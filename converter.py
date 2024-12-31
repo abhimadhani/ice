@@ -41,6 +41,8 @@ if uploaded_file is not None:
     st.write("File uploaded successfully.")
     
     try:
+       
+        
         # Process the file
         xls = pd.ExcelFile(uploaded_file)  # Use the in-memory file directly
         output_data = process_excel_to_json(xls)
