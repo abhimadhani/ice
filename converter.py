@@ -1,11 +1,10 @@
 import pandas as pd
 import json
+import streamlit as st
 from datetime import datetime
-import pytz
 
 # Define function to process input Excel and produce JSON output
-def process_excel_to_json(input_file, output_file):
-    # Load data from Excel sheets
+def process_excel_to_json(input_file):
     xls = pd.ExcelFile(input_file)
 
     # Assuming sheets match structure from the JSON file
@@ -29,18 +28,34 @@ def process_excel_to_json(input_file, output_file):
         "itemDetailsRequest": item_details
     }
 
-    # Determine user's system time zone
-    user_timezone = datetime.now().astimezone().tzinfo
+    return output_data
 
-    # Write output to JSON
-    with open(output_file, "w") as json_file:
-        json.dump(output_data, json_file, indent=4, default=lambda x: (x.isoformat() + 'Z').replace('+00:00Z', '.000Z') if isinstance(x, pd.Timestamp) else str(x))
+# Streamlit Web UI
+st.title("Excel to JSON Converter")
+st.write("Upload an Excel file to convert it into JSON format.")
 
-# Input and output file paths
-input_file = "input.xlsx"
-output_file = "output.json"
+# File uploader
+uploaded_file = st.file_uploader("Upload your Excel file", type="xlsx")
 
-# Run the function
-process_excel_to_json(input_file, output_file)
+if uploaded_file is not None:
+    st.write("File uploaded successfully.")
+    
+    try:
+        # Process the file
+        output_data = process_excel_to_json(uploaded_file)
 
-print(f"Data from {input_file} has been processed and saved to {output_file}.")
+        # Display JSON preview
+        st.write("Preview of the JSON output:")
+        st.json(output_data)
+
+        # Convert JSON to string and encode for download
+        json_string = json.dumps(output_data, indent=4)
+        st.download_button(
+            label="Download JSON file",
+            data=json_string,
+            file_name="output.json",
+            mime="application/json"
+        )
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
