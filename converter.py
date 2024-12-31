@@ -42,7 +42,8 @@ if uploaded_file is not None:
     
     try:
         # Process the file
-        output_data = process_excel_to_json(uploaded_file)
+        xls = pd.ExcelFile(uploaded_file)  # Use the in-memory file directly
+        output_data = process_excel_to_json(xls)
 
         # Display JSON preview
         st.write("Preview of the JSON output:")
